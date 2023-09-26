@@ -6,7 +6,6 @@ backcall==0.2.0
 beautifulsoup4==4.12.2
 bidict==0.22.1
 bokeh==3.2.2
-catsHTM==0.2.4
 ccompiler==0.3.0
 certifi==2023.5.7
 charset-normalizer==3.1.0
