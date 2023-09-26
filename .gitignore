@@ -2,3 +2,5 @@ VENV
 stam_output
 binospec
 data
+.venv
+img/bb_fits
