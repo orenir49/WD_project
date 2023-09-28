@@ -4,3 +4,5 @@ binospec
 data
 .venv
 img/bb_fits
+img/kurucz
+img/spec
