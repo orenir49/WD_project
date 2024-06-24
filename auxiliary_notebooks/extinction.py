@@ -34,16 +34,16 @@ const_kV = 1.02 ## Av = A0 * const_kV: rough but convenient conversion factor
 def get_kX(Av,teff,model):
     ## returns Av/Ax for a given Av, teff and model
     ## we calculate kX through k0X = Ax/A0, for which the model is available
-    c0 = model['1'][0]
-    cx = model['A0'][0]
-    cy = model['teffnorm'][0]
-    cxx = model['A0^2'][0]
-    cyy = model['teffnorm^2'][0]
-    cxy = model['A0 teffnorm'][0]
-    cxxy = model['A0^2 teffnorm'][0]
-    cxyy = model['A0 teffnorm^2'][0]
-    cxxx = model['A0^3'][0]
-    cyyy = model['teffnorm^3'][0]
+    c0 = model['1'].iloc[0]
+    cx = model['A0'].iloc[0]
+    cy = model['teffnorm'].iloc[0]
+    cxx = model['A0^2'].iloc[0]
+    cyy = model['teffnorm^2'].iloc[0]
+    cxy = model['A0 teffnorm'].iloc[0]
+    cxxy = model['A0^2 teffnorm'].iloc[0]
+    cxyy = model['A0 teffnorm^2'].iloc[0]
+    cxxx = model['A0^3'].iloc[0]
+    cyyy = model['teffnorm^3'].iloc[0]
     x = Av / const_kV ## kV = Av/A0 ---->  A0 = Av/kV
     y = teff/5040
 
@@ -130,7 +130,7 @@ def get_WISE_extinction(Av,bprp0):
 
 def get_teff(bprp0):
     # returns rough estimate of teff from photometry- to be used in the extinction calculations
-    tbl = pd.DataFrame(np.genfromtxt('../data/PARSEC v1.2S/zams.dat',names=True,dtype=None,skip_header=13))
+    tbl = pd.DataFrame(np.genfromtxt('./data/PARSEC v1.2S/zams.dat',names=True,dtype=None,skip_header=13))
     tbl = tbl[tbl['Mini'] < 5]
     bprp = tbl['G_BPmag'] - tbl['G_RPmag']
     t = 10**tbl['logTe']
