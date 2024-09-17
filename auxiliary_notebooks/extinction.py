@@ -4,6 +4,32 @@ from dustapprox.models import PrecomputedModel
 
 lib = PrecomputedModel()
 
+# Load the models to save time
+
+filename = lib.find(passband='Gaia')[0]['filename']
+model = lib.load_model(filename)
+modelG,modelBP,modelRP = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas()
+
+filename = lib.find(passband='GALEX')[0]['filename']
+model = lib.load_model(filename)
+modelFUV,modelNUV = model[0].to_pandas(),model[1].to_pandas()
+
+filename = lib.find(passband='Johnson')[0]['filename']
+model = lib.load_model(filename)
+modelU,modelB,modelV,modelR,modelI = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas(),model[4].to_pandas()
+
+filename = lib.find(passband='SDSS')[0]['filename']
+model = lib.load_model(filename)
+modelu,modelg,modelr,modeli,modelz = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas(),model[4].to_pandas()
+
+filename = lib.find(passband='2MASS')[0]['filename']
+model = lib.load_model(filename)
+modelJ,modelH,modelKs = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas()
+
+filename = lib.find(passband='WISE')[0]['filename']
+model = lib.load_model(filename)
+modelW1,modelW2,modelW3,modelW4 = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas()
+
 def kV():
     ## return Av/A0 for Johnson V band
     ## We work with Av, but the model uses A0. This function gives a quick and dirty conversion factor
@@ -29,10 +55,9 @@ def kV():
     Z = km_poly(X,Y)
     return Z.mean(), Z.std()
 
-const_kV = 1.02 ## Av = A0 * const_kV: rough but convenient conversion factor
+const_kV = 1.02 # Av = A0 * const_kV: rough but convenient conversion factor
 
-def get_kX(Av,teff,model):
-    ## returns Av/Ax for a given Av, teff and model
+def get_kX(Av,teff,model): # returns Av/Ax for a given Av, teff and model
     ## we calculate kX through k0X = Ax/A0, for which the model is available
     c0 = model['1'].iloc[0]
     cx = model['A0'].iloc[0]
@@ -51,11 +76,7 @@ def get_kX(Av,teff,model):
     kX = k0X * const_kV  ## kX = Ax/Av
     return kX
 
-def get_Gaia_extinction(Av,bprp0=0,teff=None):
-    # returns Ag, Abp, Arp for a given Av and teff
-    filename = lib.find(passband='Gaia')[0]['filename']
-    model = lib.load_model(filename)
-    modelG,modelBP,modelRP = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas()
+def get_Gaia_extinction(Av,bprp0=0,teff=None): # returns Ag, Abp, Arp for a given Av and teff
     if teff is None:
         teff = get_teff(bprp0)
     kG = get_kX(Av,teff,model=modelG) 
@@ -64,29 +85,20 @@ def get_Gaia_extinction(Av,bprp0=0,teff=None):
 
     return kG * Av, kBP * Av, kRP * Av
 
-def get_AG_EBPRP(Av,bprp0=0,teff=None):
-    # returns Ag, E(BP-RP) for a given Av and teff
+def get_AG_EBPRP(Av,bprp0=0,teff=None): # returns Ag, E(BP-RP) for a given Av and teff
     if teff is None:
         teff = get_teff(bprp0)
     ag,abp,arp = get_Gaia_extinction(Av,teff)
     return ag,abp-arp
     
-def get_Galex_extinction(Av,bprp0=0,teff=None):
-    # returns ANUV, AFUV for a given Av, teff
-    filename = lib.find(passband='GALEX')[0]['filename']
-    model = lib.load_model(filename)
-    modelFUV,modelNUV = model[0].to_pandas(),model[1].to_pandas()
+def get_Galex_extinction(Av,bprp0=0,teff=None): # returns AFUV, ANUV for a given Av, teff
     if teff is None:
         teff = get_teff(bprp0)
     kFUV = get_kX(Av,teff,model=modelFUV)
     kNUV = get_kX(Av,teff,model=modelNUV)
-    return kNUV * Av, kFUV * Av
+    return kFUV * Av, kNUV * Av
 
-def get_Johnson_extinction(Av,bprp0=0,teff=None):
-    # returns AU, AB, AV, AR, AI for a given Av, teff
-    filename = lib.find(passband='Johnson')[0]['filename']
-    model = lib.load_model(filename)
-    modelU,modelB,modelV,modelR,modelI = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas(),model[4].to_pandas()
+def get_Johnson_extinction(Av,bprp0=0,teff=None): # returns AU, AB, AV, AR, AI for a given Av, teff
     if teff is None:
         teff = get_teff(bprp0)
     kU = get_kX(Av,teff,model=modelU) 
@@ -96,11 +108,7 @@ def get_Johnson_extinction(Av,bprp0=0,teff=None):
     kI = get_kX(Av,teff,model=modelI) 
     return kU * Av, kB * Av, kV * Av, kR * Av, kI * Av
 
-def get_SDSS_extinction(Av,bprp0=0,teff=None):
-    # returns u, g, r, i, z for a given Av, teff
-    filename = lib.find(passband='SDSS')[0]['filename']
-    model = lib.load_model(filename)
-    modelu,modelg,modelr,modeli,modelz = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas(),model[4].to_pandas()
+def get_SDSS_extinction(Av,bprp0=0,teff=None): # returns extinction in u, g, r, i, z for a given Av, teff
     if teff is None:
         teff = get_teff(bprp0)
     ku = get_kX(Av,teff,model=modelu)
@@ -110,11 +118,7 @@ def get_SDSS_extinction(Av,bprp0=0,teff=None):
     kz = get_kX(Av,teff,model=modelz)
     return ku * Av, kg * Av, kr * Av, ki * Av, kz * Av
 
-def get_2MASS_extinction(Av,bprp0=0,teff=None):
-    # returns J, H, Ks for a given Av, teff
-    filename = lib.find(passband='2MASS')[0]['filename']
-    model = lib.load_model(filename)
-    modelJ,modelH,modelKs = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas()
+def get_2MASS_extinction(Av,bprp0=0,teff=None): # returns extinction in J, H, Ks for a given Av, teff
     if teff is None:
         teff = get_teff(bprp0)
     kJ = get_kX(Av,teff,model=modelJ) 
@@ -122,11 +126,7 @@ def get_2MASS_extinction(Av,bprp0=0,teff=None):
     kKs = get_kX(Av,teff,model=modelKs)
     return kJ * Av, kH * Av, kKs * Av
 
-def get_WISE_extinction(Av,bprp0=0,teff=None):
-    # returns W1, W2, W3, W4 for a given Av, teff
-    filename = lib.find(passband='WISE')[0]['filename']
-    model = lib.load_model(filename)
-    modelW1,modelW2,modelW3,modelW4 = model[0].to_pandas(),model[1].to_pandas(),model[2].to_pandas(),model[3].to_pandas()
+def get_WISE_extinction(Av,bprp0=0,teff=None): # returns extinction in W1, W2, W3, W4 for a given Av, teff
     if teff is None:
         teff = get_teff(bprp0)
     kW1 = get_kX(Av,teff,model=modelW1) 
@@ -135,8 +135,7 @@ def get_WISE_extinction(Av,bprp0=0,teff=None):
     kW4 = get_kX(Av,teff,model=modelW4) 
     return kW1 * Av, kW2 * Av, kW3 * Av, kW4 * Av
 
-def get_teff(bprp0):
-    # returns rough estimate of teff from photometry- to be used in the extinction calculations
+def get_teff(bprp0): # returns rough estimate of teff from photometry- to be used in the extinction calculations
     tbl = pd.DataFrame(np.genfromtxt('./zams.dat',names=True,dtype=None,skip_header=13))
     tbl = tbl[tbl['Mini'] < 5]
     bprp = tbl['G_BPmag'] - tbl['G_RPmag']
